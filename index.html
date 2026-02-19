@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ramadan Night</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+background:radial-gradient(circle at bottom,#0b1026 0%,#000 80%);
+color:white;
+font-family:Arial;
+overflow:hidden;
+text-align:center;
+}
+
+/* ================= NAV ================= */
+nav{
+position:fixed;
+top:0;
+width:100%;
+background:#111;
+padding:15px;
+box-shadow:0 0 15px gold;
+z-index:20;
+}
+nav a{
+color:gold;
+margin:0 20px;
+text-decoration:none;
+font-weight:bold;
+}
+
+/* ================= STAR FIELD ================= */
+.stars{
+position:absolute;
+width:200%;
+height:200%;
+animation:moveStars 180s linear infinite;
+}
+.stars::after{
+content:"";
+position:absolute;
+width:2px;height:2px;
+background:white;
+box-shadow:
+50px 100px white,150px 300px white,250px 500px white,
+400px 200px white,600px 600px white,800px 150px white,
+1000px 400px white,1200px 700px white,1400px 250px white,
+1600px 500px white,1800px 800px white,2000px 300px white,
+2200px 600px white,2400px 200px white,2600px 700px white,
+2800px 400px white,3000px 900px white,
+3200px 500px white,3400px 100px white,3600px 750px white;
+animation:twinkle 2s infinite alternate;
+}
+@keyframes moveStars{
+from{transform:translate(0,0);}
+to{transform:translate(-50%,-50%);}
+}
+@keyframes twinkle{
+from{opacity:0.3;}
+to{opacity:1;}
+}
+
+/* ================= MOON ================= */
+.moon{
+position:absolute;
+top:80px;
+right:80px;
+width:120px;height:120px;
+border-radius:50%;
+background:radial-gradient(circle at 30% 30%,#fff,#ddd);
+box-shadow:0 0 60px rgba(255,255,200,0.9);
+}
+.moon::after{
+content:"";
+position:absolute;
+left:35px;
+width:120px;height:120px;
+border-radius:50%;
+background:#0b1026;
+}
+
+/* ================= SHOOTING STAR ================= */
+.shoot{
+position:absolute;
+width:3px;height:120px;
+background:linear-gradient(-45deg,white,transparent);
+animation:shooting 8s infinite;
+}
+@keyframes shooting{
+0%{top:-100px;left:5%;opacity:1;}
+100%{top:100%;left:90%;opacity:0;}
+}
+
+/* ================= FLOATING LANTERNS ================= */
+.lantern{
+position:absolute;
+bottom:-150px;
+width:40px;
+height:60px;
+background:gold;
+border-radius:20px;
+box-shadow:0 0 20px gold;
+animation:float 15s infinite ease-in;
+}
+@keyframes float{
+0%{transform:translateY(0);}
+100%{transform:translateY(-120vh);}
+}
+
+/* ================= CARD ================= */
+.card{
+margin-top:150px;
+width:450px;
+margin-left:auto;
+margin-right:auto;
+padding:40px;
+border-radius:20px;
+background:rgba(20,25,60,0.85);
+backdrop-filter:blur(15px);
+position:relative;
+overflow:hidden;
+}
+
+/* GOLD SHIMMER BORDER */
+.card::before{
+content:"";
+position:absolute;
+top:0;
+left:-100%;
+width:200%;
+height:100%;
+background:linear-gradient(120deg,transparent,rgba(255,215,0,0.5),transparent);
+animation:shimmer 4s infinite;
+}
+@keyframes shimmer{
+0%{left:-100%;}
+100%{left:100%;}
+}
+
+h1{color:gold;}
+
+#timer{
+font-size:28px;
+margin-top:20px;
+color:gold;
+}
+
+#hadith{
+margin-top:20px;
+font-size:14px;
+line-height:1.6;
+color:#ddd;
+}
+
+#allahName{
+margin-top:15px;
+font-size:20px;
+color:gold;
+font-weight:bold;
+}
+
+/* ================= MOBILE ================= */
+@media(max-width:600px){
+.card{
+width:90%;
+padding:25px;
+margin-top:130px;
+}
+h1{font-size:22px;}
+#timer{font-size:22px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+<a href="index.html">Home</a>
+<a href="time.html">Full Timetable</a>
+</nav>
+
+<div class="stars"></div>
+<div class="moon"></div>
+<div class="shoot"></div>
+
+<div class="lantern" style="left:15%;animation-delay:0s;"></div>
+<div class="lantern" style="left:45%;animation-delay:4s;"></div>
+<div class="lantern" style="left:75%;animation-delay:8s;"></div>
+
+<div class="card">
+<h1>🌙 Ramadan Night</h1>
+<div id="roza"></div>
+<div id="sehriIftar"></div>
+<div id="timer"></div>
+<div id="hadith"></div>
+<div id="allahName"></div>
+</div>
+
+<audio id="suhoorSound" src="Suhoor.mp3"></audio>
+<audio id="iftarSound" src="iftar.mp3"></audio>
+
+<script src="ramadan-data.js"></script>
+<script>
+
+/* ===== LOAD TODAY DATA ===== */
+const todayData = getTodayRamadanData();
+
+if(todayData){
+document.getElementById("roza").innerText="Roza #"+todayData.roza;
+document.getElementById("sehriIftar").innerHTML=
+"Sehri: "+todayData.sehri+" | Iftar: "+todayData.iftar;
+startTimer(todayData.sehri,todayData.iftar);
+}
+
+/* ===== TIMER ===== */
+function toSeconds(t){
+const p=t.split(":");
+return parseInt(p[0])*3600+parseInt(p[1])*60;
+}
+
+function startTimer(sehri,iftar){
+
+let lastSecond=null;
+let suhoorPlayed=false;
+let iftarPlayed=false;
+
+setInterval(()=>{
+
+const now=new Date();
+const current=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();
+const sehriSec=toSeconds(sehri);
+const iftarSec=toSeconds(iftar);
+
+let remain,label;
+
+if(current<sehriSec){
+remain=sehriSec-current;
+label="Suhoor ends in";
+}else if(current<iftarSec){
+remain=iftarSec-current;
+label="Iftar in";
+}else{
+remain=(86400-current)+sehriSec;
+label="Next Suhoor in";
+suhoorPlayed=false;
+iftarPlayed=false;
+}
+
+const h=Math.floor(remain/3600);
+const m=Math.floor((remain%3600)/60);
+const s=remain%60;
+
+document.getElementById("timer").innerHTML=
+label+"<br>"+String(h).padStart(2,"0")+":"+
+String(m).padStart(2,"0")+":"+
+String(s).padStart(2,"0");
+
+/* SAFE AUDIO CROSSING */
+if(lastSecond!==null){
+
+if(!suhoorPlayed && lastSecond<sehriSec && current>=sehriSec){
+document.getElementById("suhoorSound").play().catch(()=>{});
+suhoorPlayed=true;
+}
+
+if(!iftarPlayed && lastSecond<iftarSec && current>=iftarSec){
+document.getElementById("iftarSound").play().catch(()=>{});
+iftarPlayed=true;
+}
+
+}
+
+lastSecond=current;
+
+},1000);
+}
+
+/* ===== ALLAH NAMES ===== */
+const names=["الله","الرحمن","الرحيم","الملك","القدوس","السلام","المؤمن","المهيمن","العزيز","الجبار","المتكبر","الخالق","البارئ","المصور","الغفار","القهار","الوهاب","الرزاق","الفتاح","العليم"];
+function rotateName(){
+document.getElementById("allahName").innerText=
+names[Math.floor(Math.random()*names.length)];
+}
+rotateName();
+setInterval(rotateName,2000);
+
+/* ===== HADITH ===== */
+const hadith=[
+{en:"Fasting is a shield.",ur:"روزہ ایک ڈھال ہے۔"},
+{en:"The best charity is in Ramadan.",ur:"سب سے بہترین صدقہ رمضان میں ہے۔"},
+{en:"The dua of a fasting person is accepted.",ur:"روزہ دار کی دعا قبول ہوتی ہے۔"}
+];
+const day=new Date().getDate();
+const h=hadith[(day-1)%hadith.length];
+document.getElementById("hadith").innerHTML=
+"<b>Hadith:</b><br>"+h.en+"<br><br>"+h.ur;
+
+</script>
+
+</body>
+</html>

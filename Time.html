@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Ramadan Timetable</title>
+
+<style>
+body{
+margin:0;
+background:black;
+color:white;
+font-family:Arial;
+text-align:center;
+}
+nav{
+background:#111;
+padding:15px;
+box-shadow:0 0 15px gold;
+}
+nav a{
+color:gold;
+margin:0 15px;
+text-decoration:none;
+font-weight:bold;
+}
+table{
+width:95%;
+margin:40px auto;
+border-collapse:collapse;
+}
+th,td{
+border:1px solid #444;
+padding:8px;
+}
+th{
+color:gold;
+}
+.today{
+background:gold;
+color:black;
+}
+</style>
+</head>
+<body>
+
+<nav>
+<a href="index.html">Home</a>
+<a href="time.html">Full Timetable</a>
+</nav>
+
+<h2>Ramadan Full Timetable</h2>
+
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Roza</th>
+<th>Sehri</th>
+<th>Sunrise</th>
+<th>Dhuhr</th>
+<th>Asr</th>
+<th>Iftar</th>
+<th>Isha</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
+
+<script src="ramadan-data.js"></script>
+<script>
+
+const tableBody=document.getElementById("tableBody");
+const today=new Date();
+
+ramadanData.forEach(day=>{
+
+const tr=document.createElement("tr");
+
+if(new Date(day.date).toDateString()===today.toDateString()){
+tr.classList.add("today");
+}
+
+tr.innerHTML=
+"<td>"+day.date+"</td>"+
+"<td>"+day.roza+"</td>"+
+"<td>"+day.sehri+"</td>"+
+"<td>"+day.sunrise+"</td>"+
+"<td>"+day.dhuhr+"</td>"+
+"<td>"+day.asr+"</td>"+
+"<td>"+day.iftar+"</td>"+
+"<td>"+day.isha+"</td>";
+
+tableBody.appendChild(tr);
+
+});
+
+</script>
+
+</body>
+</html>
